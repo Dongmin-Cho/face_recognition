@@ -7,6 +7,7 @@
 #include <dlib/dnn.h>
 #include <dlib/image_io.h>
 #include <dlib/image_processing/frontal_face_detector.h>
+#include <fstream>
 
 using namespace dlib;
 using namespace std;
@@ -40,13 +41,17 @@ using anet_type = loss_metric<fc_no_bias<128,avg_pool_everything<
                             >>>>>>>>>>>>;
 
 // ----------------------------------------------------------------------------------------
+
 std::vector<matrix<rgb_pixel>> jitter_image(
     const matrix<rgb_pixel>& img
 );
+
 // ----------------------------------------------------------------------------------------
 
 int main(int argc, char** argv) try
 {
+    // The first thing we are going to do is load all our models.  First, since we need to
+    // find faces in the image we will need a face detector:
     frontal_face_detector detector = get_frontal_face_detector();
     // We will also use a face landmarking model to align faces to a standard pose:  (see face_landmark_detection_ex.cpp for an introduction)
     shape_predictor sp;
@@ -57,11 +62,13 @@ int main(int argc, char** argv) try
 
     std::vector<matrix<rgb_pixel>> faces;
     matrix<rgb_pixel> img;
+	
     std::string path = argv[1];
     load_image(img, path);
 
+
     // Run the face detector on the image of our action heroes, and for each face extract a
-    // copy that has been normalized to 150x150 pixels in size and appropriately rotated
+   	// copy that has been normalized to 150x150 pixels in size and appropriately rotated
     // and centered.
     for (auto face : detector(img))
     {
@@ -71,7 +78,7 @@ int main(int argc, char** argv) try
         faces.push_back(move(face_chip));
         // Also put some boxes on the faces so we can see that the detector is finding
         // them.
-    }
+   	}
 
     if (faces.size() == 0)
     {
@@ -86,10 +93,18 @@ int main(int argc, char** argv) try
     // identify if a pair of images are from the same person or from different people.  
     std::vector<matrix<float,0,1>> face_descriptors = net(faces);
 
+	
+	int index = path.find(".");
+	string fileName = path;
+	fileName = fileName.erase(index,fileName.length()-index);
     for(size_t i = 0; i < face_descriptors.size(); i++)
-    {
-        cout << trans(face_descriptors[i]);
+   {
+        ofstream out(fileName+to_string(i)+".txt");
+		if(out.is_open()){
+			out << trans(face_descriptors[i]);
+		}
     }
+	
 }
 catch (std::exception& e)
 {
