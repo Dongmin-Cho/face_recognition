@@ -93,7 +93,7 @@ int main(int argc, char** argv) try
     // identify if a pair of images are from the same person or from different people.  
     std::vector<matrix<float,0,1>> face_descriptors = net(faces);
 
-	
+	//.txt	
 	int index = path.find(".");
 	string fileName = path;
 	fileName = fileName.erase(index,fileName.length()-index);
