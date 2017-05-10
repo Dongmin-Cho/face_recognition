@@ -1,7 +1,6 @@
 #define PADDING 0.35
 #define SIMILARITY 0.35
 
-#include <dlib/gui_widgets.h>
 #include <dlib/clustering.h>
 #include <dlib/string.h>
 #include <dlib/dnn.h>
