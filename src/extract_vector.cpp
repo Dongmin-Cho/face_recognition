@@ -59,51 +59,53 @@ int main(int argc, char** argv) try
     anet_type net;
     deserialize("dlib_face_recognition_resnet_model_v1.dat") >> net;
 
-    std::vector<matrix<rgb_pixel>> faces;
-    matrix<rgb_pixel> img;
+	for(int i=1; i<argc; i++){
+    	std::vector<matrix<rgb_pixel>> faces;
+    	matrix<rgb_pixel> img;
 	
-    std::string path = argv[1];
-    load_image(img, path);
+    	std::string path = argv[i];
+		cout<<path<<endl;
+    	load_image(img, argv[i]);
+		
+		
+    	// Run the face detector on the image of our action heroes, and for each face extract a
+   		// copy that has been normalized to 150x150 pixels in size and appropriately rotated
+    	// and centered.
+    	for (auto face : detector(img))
+    	{
+        	auto shape = sp(img, face);
+        	matrix<rgb_pixel> face_chip;
+        	extract_image_chip(img, get_face_chip_details(shape,150,PADDING), face_chip);
+        	faces.push_back(move(face_chip));
+        	// Also put some boxes on the faces so we can see that the detector is finding
+        	// them.
+   		}
 
+    	if (faces.size() == 0)
+    	{
+        	cout << "No faces found in image!" << endl;
+    	}
+		else{
+			// This call asks the DNN to convert each face image in faces into a 128D vector.
+    		// In this 128D vector space, images from the same person will be close to each other
+   			// but vectors from different people will be far apart.  So we can use these vectors to
+    		// identify if a pair of images are from the same person or from different people.  
+    		std::vector<matrix<float,0,1>> face_descriptors = net(faces);
 
-    // Run the face detector on the image of our action heroes, and for each face extract a
-   	// copy that has been normalized to 150x150 pixels in size and appropriately rotated
-    // and centered.
-    for (auto face : detector(img))
-    {
-        auto shape = sp(img, face);
-        matrix<rgb_pixel> face_chip;
-        extract_image_chip(img, get_face_chip_details(shape,150,PADDING), face_chip);
-        faces.push_back(move(face_chip));
-        // Also put some boxes on the faces so we can see that the detector is finding
-        // them.
-   	}
-
-    if (faces.size() == 0)
-    {
-        cout << "No faces found in image!" << endl;
-        return 1;
-    }
-
-
-    // This call asks the DNN to convert each face image in faces into a 128D vector.
-    // In this 128D vector space, images from the same person will be close to each other
-    // but vectors from different people will be far apart.  So we can use these vectors to
-    // identify if a pair of images are from the same person or from different people.  
-    std::vector<matrix<float,0,1>> face_descriptors = net(faces);
-
-	//.txt	
-	int index = path.find(".");
-	string fileName = path;
-	fileName = fileName.erase(index,fileName.length()-index);
-    for(size_t i = 0; i < face_descriptors.size(); i++)
-   {
-        ofstream out(fileName+to_string(i)+".txt");
-		if(out.is_open()){
-			out << trans(face_descriptors[i]);
+			//.txt	
+			int index = path.find(".jpg");
+			string fileName = path;
+			fileName = fileName.erase(index,fileName.length()-index);
+    		for(size_t i = 0; i < face_descriptors.size(); i++)
+   			{
+        		ofstream out(fileName+to_string(i)+".txt");
+				if(out.is_open()){
+					out << trans(face_descriptors[i]);
+				}
+				cout<<trans(face_descriptors[i])<<endl;
+    		}
 		}
-    }
-	
+	}
 }
 catch (std::exception& e)
 {
