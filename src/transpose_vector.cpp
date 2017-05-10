@@ -7,25 +7,25 @@ using namespace std;
 using namespace dlib;
 #define MAX_SIZE 128
 
-string* strSplit(string strOrigin, string strTok){
-	int cutAt;  
+string* str_split(string str_origin, string str_tok){
+	int cut_at;  
 	int index = 0; 
-	string* strResult = new string[MAX_SIZE];
+	string* str_result = new string[MAX_SIZE];
 
-	while((cutAt = strOrigin.find_first_of(strTok)) != strOrigin.npos)
+	while((cut_at = str_origin.find_first_of(str_tok)) != str_origin.npos)
 	{
-		if(cutAt >  0)
+		if(cut_at >  0)
 		{
-			strResult[index++] = strOrigin.substr(0,cutAt);
+			str_result[index++] = str_origin.substr(0,cut_at);
 		}
 
-		strOrigin = strOrigin.substr(cutAt +1);
+		str_origin = str_origin.substr(cut_at +1);
 	}
-	if(strOrigin.length() > 0)
+	if(str_origin.length() > 0)
 	{
-		strResult[index++] = strOrigin.substr(0,cutAt);
+		str_result[index++] = str_origin.substr(0,cut_at);
 	}
-	return strResult;
+	return str_result;
 }
 
 /*
@@ -42,12 +42,12 @@ matrix<float,MAX_SIZE,1> txt_to_matrix(string path){
 	ifstream inFile(path);
 	getline(inFile,str1);
 
-	string* strAry = strSplit(str1," ");
+	string* str_ary = str_split(str1," ");
 	inFile.close();
 
 
 	for(int j=0; j<MAX_SIZE;j++){
-		f[j] = std::stof(strAry[j]);
+		f[j] = std::stof(str_ary[j]);
 	}
 
 	matrix<float,MAX_SIZE,1> mat;
