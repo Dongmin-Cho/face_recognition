@@ -1,4 +1,4 @@
-#define PADDING 0.35
+#define PADDING 0.225
 #define SIMILARITY 0.35
 
 #include <dlib/gui_widgets.h>
@@ -38,8 +38,17 @@ using anet_type = loss_metric<fc_no_bias<128,avg_pool_everything<
                             max_pool<3,3,2,2,relu<affine<con<32,7,7,2,2,
                             input_rgb_image_sized<150>
                             >>>>>>>>>>>>;
+float vector_size(matrix<float,128,1> vector)
+{   
+    float squar_sum = 0;
+    for(int i = 0; i < 128; i++)
+    {
+        squar_sum += vector(i,1) * vector(i,1);
+    }
+    return sqrt(squar_sum);
+}
 
-int main() try
+int main(int argc, char** argv) try
 {
     // The first thing we are going to do is load all our models.  First, since we need to
     // find faces in the image we will need a face detector:
@@ -52,12 +61,10 @@ int main() try
     deserialize("dlib_face_recognition_resnet_model_v1.dat") >> net;
 
     std::vector<matrix<rgb_pixel>> faces;
-    for(int i = 0; i < 18; i++)
+    for(int i = 2; i < argc; i++)
     {
         matrix<rgb_pixel> img;
-        std::string path = "../sample/test";
-        path += to_string(i);
-        path += ".jpg";
+        std::string path = argv[i];
         load_image(img, path);
         // Display the raw image on the screen
 
@@ -86,7 +93,7 @@ int main() try
     // but vectors from different people will be far apart.  So we can use these vectors to
     // identify if a pair of images are from the same person or from different people.  
     std::vector<matrix<float,0,1>> face_descriptors = net(faces);
-  //  for(size_t i = 0; i < faces.size(); i++)
+    //r(size_t i = 0; i < faces.size(); i++)
     //    face_descriptors.push_back(mean(mat(net(jitter_image(faces[i])))));
 
     cout << face_descriptors.size() << endl;
@@ -102,8 +109,15 @@ int main() try
             // the distance between two face descriptors is less than 0.6, which is the
             // decision threshold the network was trained to use.  Although you can
             // certainly use any other threshold you find useful.
-            if (length(face_descriptors[i]-face_descriptors[j]) < SIMILARITY)
+           //length(face_descriptors[i]-face_descriptors[j]);
+            float distance = 0;
+            for(size_t vector_index = 0; vector_index < 128; vector_index++)
+                distance +=
+                (face_descriptors[i](vector_index,0)-face_descriptors[j](vector_index,0))*(face_descriptors[i](vector_index,0)-face_descriptors[j](vector_index,0));
+            distance = sqrt(distance);
+            if (distance < atof(argv[1])) // SIMILARITY)
                 edges.push_back(sample_pair(i,j));
+            cout << argv[i] << " && " << argv[j] << distance <<endl;
         }
     }
     std::vector<unsigned long> labels;

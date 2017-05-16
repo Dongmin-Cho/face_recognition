@@ -100,7 +100,7 @@ int main(int argc, char** argv) try
    			{
         		ofstream out(fileName+to_string(i)+".txt");
 				if(out.is_open()){
-					out << trans(face_descriptors[i]);
+					out << face_descriptors[i];
 				}
 				cout<<trans(face_descriptors[i])<<endl;
     		}
