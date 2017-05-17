@@ -1,5 +1,6 @@
 #define PADDING 0.225
 #define SIMILARITY 0.35
+#define VECTOR_SIZE 4096
 
 #include <dlib/gui_widgets.h>
 #include <dlib/clustering.h>
@@ -7,79 +8,38 @@
 #include <dlib/dnn.h>
 #include <dlib/image_io.h>
 #include <dlib/image_processing/frontal_face_detector.h>
+#include "transpose_vector.h"
 
 using namespace dlib;
 using namespace std;
 
-template <template <int,template<typename>class,int,typename> class block, int N, template<typename>class BN, typename SUBNET>
-using residual = add_prev1<block<N,BN,1,tag1<SUBNET>>>;
+float vector_length(float* in_vect)
+{
+    float distance = 0.0;
+    for(size_t i = 0; i < VECTOR_SIZE; i++)
+        distance += (n_vector[i]*in_vector[i])
+    return sqrt(distance);
+}
 
-template <template <int,template<typename>class,int,typename> class block, int N, template<typename>class BN, typename SUBNET>
-using residual_down = add_prev2<avg_pool<2,2,2,2,skip1<tag2<block<N,BN,2,tag1<SUBNET>>>>>>;
-
-template <int N, template <typename> class BN, int stride, typename SUBNET> 
-using block  = BN<con<N,3,3,1,1,relu<BN<con<N,3,3,stride,stride,SUBNET>>>>>;
-
-template <int N, typename SUBNET> using ares      = relu<residual<block,N,affine,SUBNET>>;
-template <int N, typename SUBNET> using ares_down = relu<residual_down<block,N,affine,SUBNET>>;
-
-template <typename SUBNET> using alevel0 = ares_down<256,SUBNET>;
-template <typename SUBNET> using alevel1 = ares<256,ares<256,ares_down<256,SUBNET>>>;
-template <typename SUBNET> using alevel2 = ares<128,ares<128,ares_down<128,SUBNET>>>;
-template <typename SUBNET> using alevel3 = ares<64,ares<64,ares<64,ares_down<64,SUBNET>>>>;
-template <typename SUBNET> using alevel4 = ares<32,ares<32,ares<32,SUBNET>>>;
-
-using anet_type = loss_metric<fc_no_bias<128,avg_pool_everything<
-                            alevel0<
-                            alevel1<
-                            alevel2<
-                            alevel3<
-                            alevel4<
-                            max_pool<3,3,2,2,relu<affine<con<32,7,7,2,2,
-                            input_rgb_image_sized<150>
-                            >>>>>>>>>>>>;
-float vector_size(matrix<float,128,1> vector)
-{   
-    float squar_sum = 0;
-    for(int i = 0; i < 128; i++)
+float vector_inner_product(vector<float> a, vector<float> b)
+{
+    float result = 0.0;
+    for(size_t i = 0; i < VECTOR_SIZE; i++)
     {
-        squar_sum += vector(i,1) * vector(i,1);
+        result += (a[i]*b[i]);
     }
-    return sqrt(squar_sum);
+    result = result / vector_length(a) / vector_length(b);
+    return result;
 }
 
 int main(int argc, char** argv) try
 {
-    // The first thing we are going to do is load all our models.  First, since we need to
-    // find faces in the image we will need a face detector:
-    frontal_face_detector detector = get_frontal_face_detector();
-    // We will also use a face landmarking model to align faces to a standard pose:  (see face_landmark_detection_ex.cpp for an introduction)
-    shape_predictor sp;
-    deserialize("shape_predictor_68_face_landmarks.dat") >> sp;
-    // And finally we load the DNN responsible for face recognition.
-    anet_type net;
-    deserialize("dlib_face_recognition_resnet_model_v1.dat") >> net;
-
-    std::vector<matrix<rgb_pixel>> faces;
+    std::vector<vector<float>> face_descriptors = NULL;
+    int vector_index = 0;
     for(int i = 2; i < argc; i++)
     {
-        matrix<rgb_pixel> img;
-        std::string path = argv[i];
-        load_image(img, path);
-        // Display the raw image on the screen
-
-        // Run the face detector on the image of our action heroes, and for each face extract a
-        // copy that has been normalized to 150x150 pixels in size and appropriately rotated
-        // and centered.
-        for (auto face : detector(img))
-        {
-            auto shape = sp(img, face);
-            matrix<rgb_pixel> face_chip;
-            extract_image_chip(img, get_face_chip_details(shape,150,PADDING), face_chip);
-            faces.push_back(move(face_chip));
-            // Also put some boxes on the faces so we can see that the detector is finding
-            // them.
-        }
+        face_descriptors[vector_index] = txt_to_vector(argv[i]); 
+        vector_index++;
     }
 
     if (faces.size() == 0)
@@ -88,37 +48,23 @@ int main(int argc, char** argv) try
         return 1;
     }
 
-    // This call asks the DNN to convert each face image in faces into a 128D vector.
-    // In this 128D vector space, images from the same person will be close to each other
-    // but vectors from different people will be far apart.  So we can use these vectors to
-    // identify if a pair of images are from the same person or from different people.  
-    std::vector<matrix<float,0,1>> face_descriptors = net(faces);
-    //r(size_t i = 0; i < faces.size(); i++)
-    //    face_descriptors.push_back(mean(mat(net(jitter_image(faces[i])))));
-
     cout << face_descriptors.size() << endl;
     // In particular, one simple thing we can do is face clustering.  This next bit of code
     // creates a graph of connected faces and then uses the Chinese whispers graph clustering
     // algorithm to identify how many people there are and which faces belong to whom.
     std::vector<sample_pair> edges;
-    for (size_t i = 0; i < face_descriptors.size(); ++i)
+    for (size_t i = 1; j < face_descriptors.size(); ++j)
     {
-        for (size_t j = i+1; j < face_descriptors.size(); ++j)
-        {
-            // Faces are connected in the graph if they are close enough.  Here we check if
-            // the distance between two face descriptors is less than 0.6, which is the
-            // decision threshold the network was trained to use.  Although you can
-            // certainly use any other threshold you find useful.
-           //length(face_descriptors[i]-face_descriptors[j]);
-            float distance = 0;
-            for(size_t vector_index = 0; vector_index < 128; vector_index++)
-                distance +=
-                (face_descriptors[i](vector_index,0)-face_descriptors[j](vector_index,0))*(face_descriptors[i](vector_index,0)-face_descriptors[j](vector_index,0));
-            distance = sqrt(distance);
-            if (distance < atof(argv[1])) // SIMILARITY)
-                edges.push_back(sample_pair(i,j));
-            cout << argv[i] << " && " << argv[j] << distance <<endl;
-        }
+        // Faces are connected in the graph if they are close enough.  Here we check if
+        // the distance between two face descriptors is less than 0.6, which is the
+        // decision threshold the network was trained to use.  Although you can
+        // certainly use any other threshold you find useful.
+        //length(face_descriptors[i]-face_descriptors[j]);
+        float similarity = vector_inner_product(face_descriptors[0], face_descriptors[i]);
+
+        if (similarity > atof(argv[1])) // SIMILARITY)
+            edges.push_back(sample_pair(i,j));
+        cout << argv[i] << " && " << argv[j] << similarity <<endl;
     }
     std::vector<unsigned long> labels;
     const auto num_clusters = chinese_whispers(edges, labels);
@@ -128,6 +74,7 @@ int main(int argc, char** argv) try
 
     // Now let's display the face clustering results on the screen.  You will see that it
     // correctly grouped all the faces. 
+    /*
     std::vector<image_window> win_clusters(num_clusters);
     for (size_t cluster_id = 0; cluster_id < num_clusters; ++cluster_id)
     {
@@ -139,7 +86,7 @@ int main(int argc, char** argv) try
         }
         win_clusters[cluster_id].set_title("face cluster " + cast_to_string(cluster_id));
         win_clusters[cluster_id].set_image(tile_images(temp));
-    }
+    }*/
 
     cout << "hit enter to terminate" << endl;
     cin.get();
