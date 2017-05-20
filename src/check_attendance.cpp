@@ -53,7 +53,6 @@ int search_MAX(std::vector<std::vector<float> > face_descriptors, std::vector<fl
             max_index = i;
         }
     }
-    cout << max_index << endl;
     return max_index;
 }
 
@@ -100,7 +99,7 @@ int main(int argc, char** argv) try
         std::string std_num = argv[i];
         temp_dir = get_txt_files(STUDENT_DIR + std_num);
         for(size_t j = 0; j < temp_dir.size(); j++)
-        {
+        {   
             std::vector<float> temp_vector = txt_to_vector(temp_dir[j]);
             descriptors_dir.push_back(temp_dir[j]);
             face_descriptors.push_back(temp_vector); 
@@ -113,6 +112,7 @@ int main(int argc, char** argv) try
         cout << "-1" << endl;
         return 1;
     }
+   
     int max_index = search_MAX(face_descriptors, benchmark_descriptor); 
     if(max_index == -1)
         cout<<"absence";

@@ -7,18 +7,22 @@ using namespace std;
 
 std::vector<float> txt_to_vector(string path)
 {
-
-	int cnt;
 	std::vector<float> descriptor;
 
-        ifstream inFile(path);
-    for(int i = 0; i < MAX_SIZE; i++)
+    ifstream in_file(path);
+    if(in_file.is_open())
     {
-        string str1="";
-        getline(inFile,str1);
-        descriptor.push_back(stof(str1));
+        for(int i = 0; i < MAX_SIZE; i++)
+        {
+            string str1="";
+            getline(in_file,str1);
+            descriptor.push_back(stof(str1));
+        }
+        in_file.close();
     }
-	inFile.close();
-
-	return descriptor;
+    else
+    {
+        cout << "error in txt to vector" << endl;
+	    return descriptor;
+    }
 }
