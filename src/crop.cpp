@@ -72,7 +72,7 @@ int main(int argc, char** argv)
                 {
                     dlib::array<array2d<rgb_pixel> > personal_face;
                     personal_face.push_back(face_chips[k]);
-                    output.erase(output.find(".")-1,output.size());
+                    output.erase(output.find(".")-(k<10?1:2),output.size());
                     output += to_string(k+1) + ".jpg";
                     save_png(tile_images(personal_face),output);
                 }
