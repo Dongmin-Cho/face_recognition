@@ -12,7 +12,7 @@ using namespace dlib;
 using namespace std;
 
 // ----------------------------------------------------------------------------------------
-// This program normalize face in the photo and saves it *.jpg in the "output" directory
+// This program normalize face in the photo and saves it *.*g in the "output" directory
 // ----------------------------------------------------------------------------------------
 int main(int argc, char** argv)
 {  
@@ -21,7 +21,7 @@ int main(int argc, char** argv)
         if (argc == 1)
         {
             cout << "call like this" << endl;
-            cout << "./crop out_dir input_jpg_files" <<endl;
+            cout << "./crop out_dir input_img_files" <<endl;
             return 0;
         }
 
@@ -73,7 +73,7 @@ int main(int argc, char** argv)
                     dlib::array<array2d<rgb_pixel> > personal_face;
                     personal_face.push_back(face_chips[k]);
                     output.erase(output.find(".")-(k<10?1:2),output.size());
-                    output += to_string(k+1) + ".jpg";
+                    output += to_string(k+1) + ".png";
                     save_png(tile_images(personal_face),output);
                 }
         }
