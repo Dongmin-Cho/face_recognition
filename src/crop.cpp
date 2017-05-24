@@ -1,9 +1,10 @@
 #include <dlib/image_processing/frontal_face_detector.h>
 #include <dlib/image_processing/render_face_detections.h>
 #include <dlib/image_processing.h>
-#include <dlib/gui_widgets.h>
 #include <dlib/image_io.h>
 #include <iostream>
+#include <algorithm>
+#include "calc.h"
 
 #define FACE_SIZE 224 
 #define FACE_PADDING 0.8
@@ -51,31 +52,42 @@ int main(int argc, char** argv)
             for (unsigned long j = 0; j < dets.size(); ++j)
             {
                 full_object_detection shape = sp(img, dets[j]);
-                cout << "number of parts: "<< shape.num_parts() << endl;
-                cout << "pixel position of first part:  " << shape.part(0) << endl;
-                cout << "pixel position of second part: " << shape.part(1) << endl;
-                // You get the idea, you can get all the face part locations if
-                // you want them.  Here we just store them in shapes so we can
-                // put them on the screen.
                 shapes.push_back(shape);
             }
             
             dlib::array<array2d<rgb_pixel> > face_chips;
             extract_image_chips(img,get_face_chip_details(shapes, FACE_SIZE, FACE_PADDING), face_chips);
            
-            string output = argv[i];
-            output.erase(0,output.find_last_of("/"));
-            output = argv[1] + output;
             
-            if(face_chips.size() != 0)
-                for(size_t k = 0; k < face_chips.size(); k++)
+            for(size_t k = 0; k < face_chips.size(); k++)
+            {
+                std::string output = argv[1];
+                dlib::array<array2d<rgb_pixel> > personal_face;
+                personal_face.push_back(face_chips[k]);
+                std::vector<std::string> temp_dir;
+                temp_dir = get_files(output, ".png");
+                std::vector<int> temp_int;
+                for(size_t i = 0; i < temp_dir.size(); i++)
                 {
-                    dlib::array<array2d<rgb_pixel> > personal_face;
-                    personal_face.push_back(face_chips[k]);
-                    output.erase(output.find(".")-(k<10?1:2),output.size());
-                    output += to_string(k+1) + ".png";
-                    save_png(tile_images(personal_face),output);
+                    std::string temp_name;
+                    temp_name = temp_dir[i].substr(temp_dir[i].find_last_of("/")+1,
+                    temp_dir[i].find(".png")-temp_dir[i].find_last_of("/")-1);
+                    temp_int.push_back(stoi(temp_name));
                 }
+                sort(temp_int.begin(), temp_int.end());
+
+                size_t j = 0;
+                for(/*nothing*/; j < temp_int.size(); j++)
+                {
+                    if(j == temp_int[j]-1)
+                        continue;
+                    else
+                        break;
+                }
+                output += to_string(j+1) + ".png";
+                cout << "save " << output << "       " << temp_dir.size() << endl;
+                save_png(tile_images(personal_face),output);
+            }
         }
     }
     catch (exception& e)
