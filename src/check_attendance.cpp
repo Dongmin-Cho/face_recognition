@@ -35,7 +35,7 @@ int main(int argc, char** argv) try
     {
         std::vector<std::string> temp_dir;
         std::string std_num = argv[i];
-        temp_dir = get_files(STUDENT_DIR + std_num, ".txt");
+        temp_dir = get_files(STUDENT_DIR + std_num + "/", ".txt");
         for(size_t j = 0; j < temp_dir.size(); j++)
         {   
             std::vector<float> temp_vector = txt_to_vector(temp_dir[j]);
