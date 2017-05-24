@@ -53,7 +53,7 @@ int main(int argc, char** argv) try
     for(int i = 0 ; i < face_descriptors.size(); i++)
     {
         cout << descriptors_dir[i] << "        ";
-        cout << vector_inner_product(benchmakr_descriptor, face_descriptors[i]) <<endl;
+        cout << vector_inner_product(benchmark_descriptor, face_descriptors[i]) <<endl;
     }
     int max_index = search_MAX(face_descriptors, benchmark_descriptor); 
     if(max_index == -1)
