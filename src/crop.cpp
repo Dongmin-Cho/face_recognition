@@ -7,7 +7,7 @@
 #include "calc.h"
 
 #define FACE_SIZE 224 
-#define FACE_PADDING 0.8
+#define FACE_PADDING 0.25
 
 using namespace dlib;
 using namespace std;
