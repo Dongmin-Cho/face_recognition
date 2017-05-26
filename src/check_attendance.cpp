@@ -1,9 +1,3 @@
-/*
-call like ./check_attendance
-
-*/
-
-#define SIMILARITY 0.7
 #define STUDENT_DIR "/home/wj/work/Im_Here/Web/public/faceImage/"
 
 #include <dlib/gui_widgets.h>
