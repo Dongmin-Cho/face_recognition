@@ -10,7 +10,7 @@
 
 using namespace std;
 #define MAX_SIZE 4096
-#define SIMILARITY 0.7
+#define SIMILARITY 0.6
 using namespace dlib;
 using namespace std;
 
