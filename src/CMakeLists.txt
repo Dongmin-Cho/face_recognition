@@ -11,5 +11,9 @@ endmacro()
 add_example(check_attendance)
 add_example(crop)
 add_example(test_desc)
+<<<<<<< HEAD
 add_example(tracking)
 add_example(testcv)
+=======
+add_example(test_vector)
+>>>>>>> ca5f44f8789537d45c27dbdce80f8d74fb21f1ed

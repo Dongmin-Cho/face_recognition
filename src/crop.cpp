@@ -6,8 +6,8 @@
 #include <algorithm>
 #include "calc.h"
 
-#define FACE_SIZE 224 
-#define FACE_PADDING 0.25
+#define FACE_SIZE 300 
+#define FACE_PADDING 0.65
 
 using namespace dlib;
 using namespace std;
