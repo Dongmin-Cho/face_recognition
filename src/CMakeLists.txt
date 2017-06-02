@@ -9,11 +9,18 @@ macro(add_example name)
    target_link_libraries(${name} dlib::dlib )
 endmacro()
 add_example(check_attendance)
-add_example(crop)
 add_example(test_desc)
-<<<<<<< HEAD
+
 add_example(tracking)
 add_example(testcv)
-=======
+
 add_example(test_vector)
->>>>>>> ca5f44f8789537d45c27dbdce80f8d74fb21f1ed
+
+
+
+#add_example(crop)
+find_package(OpenCV)
+include_directories(${OpenCV_INCLUDE_DIRS})
+add_executable(crop crop.cpp crop_face_img.cpp)
+target_link_libraries(crop ${OpenCV_LIBS} dlib::dlib)
+
