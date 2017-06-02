@@ -13,7 +13,6 @@
 #include "calc.h"
 #include "crop_face_img.h"
 
-
 #define FACE_SIZE 300
 #define FACE_PADDING 0.65
 

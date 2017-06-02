@@ -10,7 +10,7 @@
 
 using namespace std;
 #define MAX_SIZE 4096
-
+#define SIMILARITY 0.65
 using namespace dlib;
 using namespace std;
 
@@ -64,7 +64,7 @@ int search_MAX(std::vector<std::vector<float> > face_descriptors, std::vector<fl
         if(face_descriptors[i].size() == 0)
             break;
         float similarity = vector_inner_product(bench_descriptor, face_descriptors[i]);
-        if(similarity >= 0.7 && similarity > max)
+        if(similarity >= SIMILARITY && similarity > max)
         {
             max = similarity;
             max_index = i;

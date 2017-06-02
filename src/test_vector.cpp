@@ -29,13 +29,9 @@ int main(int argc, char** argv) try
     {
         std::vector<std::string> temp_dir;
         std::string std_num = argv[i];
-        temp_dir = get_files(STUDENT_DIR + std_num + "/", ".txt");
-        for(size_t j = 0; j < temp_dir.size(); j++)
-        {   
-            std::vector<float> temp_vector = txt_to_vector(temp_dir[j]);
-            descriptors_dir.push_back(temp_dir[j]);
-            face_descriptors.push_back(temp_vector); 
-        }
+        std::vector<float> temp_vector = txt_to_vector(argv[i]);
+        descriptors_dir.push_back(argv[i]);
+        face_descriptors.push_back(temp_vector); 
         vector_index++;
     }
 
@@ -44,7 +40,11 @@ int main(int argc, char** argv) try
         cout << "-1" << endl;
         return 1;
     }
-   
+    for(int i = 0 ; i < face_descriptors.size(); i++)
+    {
+        cout << descriptors_dir[i] << "        ";
+        cout << vector_inner_product(benchmark_descriptor, face_descriptors[i]) <<endl;
+    }
     int max_index = search_MAX(face_descriptors, benchmark_descriptor); 
     if(max_index == -1)
         cout<<"absence";
