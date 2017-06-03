@@ -10,24 +10,12 @@ macro(add_example name)
 endmacro()
 add_example(check_attendance)
 add_example(test_desc)
-<<<<<<< HEAD
-add_example(tracking)
-add_example(testcv)
 add_example(test_vector)
 
-=======
-
-add_example(tracking)
-add_example(testcv)
-
-add_example(test_vector)
-
-
-
->>>>>>> dd729366cb38b009b92174f5d66f45ebdffce666
 #add_example(crop)
 find_package(OpenCV)
 include_directories(${OpenCV_INCLUDE_DIRS})
 add_executable(crop crop.cpp crop_face_img.cpp)
 target_link_libraries(crop ${OpenCV_LIBS} dlib::dlib)
-
+add_executable(tracking tracking.cpp)
+target_link_libraries(tracking ${OpenCV_LIBS} dlib::dlib)
