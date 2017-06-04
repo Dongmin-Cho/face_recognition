@@ -17,5 +17,9 @@ find_package(OpenCV)
 include_directories(${OpenCV_INCLUDE_DIRS})
 add_executable(crop crop.cpp crop_face_img.cpp)
 target_link_libraries(crop ${OpenCV_LIBS} dlib::dlib)
+
+add_executable(head_track head_track.cpp)
+target_link_libraries(head_track ${OpenCV_LIBS} dlib::dlib)
 add_executable(tracking tracking.cpp)
 target_link_libraries(tracking ${OpenCV_LIBS} dlib::dlib)
+
