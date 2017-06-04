@@ -84,7 +84,7 @@ int main(int argc, char** argv)
             cv::Mat camera_matrix = (cv::Mat_<double>(3,3) << focal_length, 0, center.x, 0 , focal_length, center.y, 0, 0, 1);
             cv::Mat dist_coeffs = cv::Mat::zeros(4,1,cv::DataType<double>::type); // Assuming no lens distortion
                                 
-            cout << "Camera Matrix " << endl << camera_matrix << endl ;
+            //cout << "Camera Matrix " << endl << camera_matrix << endl ;
             // Output rotation and translation
             cv::Mat rotation_vector; // Rotation in axis-angle form
             cv::Mat translation_vector;
@@ -119,26 +119,17 @@ int main(int argc, char** argv)
      
                 //cv::line(im,image_points[0], nose_end_point2D[0], cv::Scalar(255,0,0), 2);
                      
-                cout << "Rotation Vector " << endl << rotation_vector << endl;
-                cout << "Translation Vector" << endl << translation_vector << endl;
+                //cout << "Rotation Vector " << endl << rotation_vector << endl;
+                //cout << "Translation Vector" << endl << translation_vector << endl;
                              
-                cout <<  nose_end_point2D << endl;
+                cout <<  nose_end_point2D << endl;// this is what we want!!!! 
 
-               // cv::Mat _pm[12] = {rotation_vector[0],rotation_vector[1],rotation_vector[2],translation_vector[0],
-                //                  rotation_vector[3],rotation_vector[4],rotation_vector[5],translation_vector[1],
-                 //                 rotation_vector[6],rotation_vector[7],rotation_vector[8],translation_vector[2]};
-                                 
-
-                /*
+                
                 ofstream fout;
                 fout.open("points.txt",ios::app);
                 
-                for(int i=0;i<point2d.size();i++){
-
-                    fout<<point2d[i]<<" ";
-                }
-                fout<<"\n";
-                fout.close();*/
+                fout<<nose_end_point2D<<endl;
+                fout.close();
 
                 // You get the idea, you can get all the face part locations if
                 // you want them.  Here we just store them in shapes so we can
@@ -148,15 +139,15 @@ int main(int argc, char** argv)
             }
 
             // Now let's view our face poses on the screen.
-            win.clear_overlay();
-            win.set_image(img);
-            win.add_overlay(render_face_detections(shapes));
+           // win.clear_overlay();
+           // win.set_image(img);
+           // win.add_overlay(render_face_detections(shapes));
 
             // We can also extract copies of each face that are cropped, rotated upright,
             // and scaled to a standard size as shown here:
-            dlib::array<array2d<rgb_pixel> > face_chips;
-            extract_image_chips(img, get_face_chip_details(shapes), face_chips);
-            win_faces.set_image(tile_images(face_chips));
+            //dlib::array<array2d<rgb_pixel> > face_chips;
+            //extract_image_chips(img, get_face_chip_details(shapes), face_chips);
+            //win_faces.set_image(tile_images(face_chips));
             
 
             cout << "Hit enter to process the next image..." << endl;
