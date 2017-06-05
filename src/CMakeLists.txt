@@ -20,6 +20,3 @@ target_link_libraries(crop ${OpenCV_LIBS} dlib::dlib)
 
 add_executable(head_track head_track.cpp)
 target_link_libraries(head_track ${OpenCV_LIBS} dlib::dlib)
-add_executable(tracking tracking.cpp)
-target_link_libraries(tracking ${OpenCV_LIBS} dlib::dlib)
-
