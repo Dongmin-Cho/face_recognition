@@ -83,7 +83,10 @@ int main(int argc, char** argv)
             Point2d center = cv::Point2d(im.cols/2,im.rows/2);
             cv::Mat camera_matrix = (cv::Mat_<double>(3,3) << focal_length, 0, center.x, 0 , focal_length, center.y, 0, 0, 1);
             cv::Mat dist_coeffs = cv::Mat::zeros(4,1,cv::DataType<double>::type); // Assuming no lens distortion
-                                
+            /*사람들 시선이 집중되어야 하는 영역이 있을거니까
+              대략 그 구역 내로 u,v좌표가 나오면 잘 보고 있는 것으로... ㅇㅇ
+              칠판이나 스크린은 점이 아니라 면이니까 각 사람들마다 u,v 거리가 좀 있대도 괜찮을 것 같고
+              해당 영역에 집중하면 반드시 얼굴 방향벡터(u,v)좌표가 넘지 못하는 한계가 있을테니....?*/                    
             //cout << "Camera Matrix " << endl << camera_matrix << endl ;
             // Output rotation and translation
             cv::Mat rotation_vector; // Rotation in axis-angle form
