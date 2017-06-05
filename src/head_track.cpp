@@ -123,7 +123,17 @@ int main(int argc, char** argv)
                 //cout << "Translation Vector" << endl << translation_vector << endl;
                              
                 cout <<  nose_end_point2D << endl;// this is what we want!!!! 
-
+                if(center.x< nose_end_point2D[0].x){
+                 if(center.y+500<nose_end_point2D[0].y){
+                    cout<<"집중 중 맞음!"<<endl;
+                 }
+                 else{
+                    cout<<"아래 봄"<<endl;
+                 }
+                }
+                else{
+                    cout<<"딴데 봄"<<endl;
+                }
                 
                 ofstream fout;
                 fout.open("points.txt",ios::app);
