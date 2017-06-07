@@ -82,11 +82,8 @@ std::vector<std::string> get_files(std::string dir,std::string want_to_get)
     std::vector<std::string> files;
     if((dp  = opendir(dir.c_str())) == NULL)
     {
-        cout << "Error opening " << dir << endl;
         mkdir(dir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-        dp  = opendir(dir.c_str());
-        cout << "mkdir" << dir << endl;
-        //return files;
+        return files;
     }
 
     while ((dirp = readdir(dp)) != NULL)
