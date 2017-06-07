@@ -97,8 +97,15 @@ int main(int argc, char** argv)
             typedef matrix<double,2,1> sample_type;
             typedef radial_basis_kernel<sample_type> kernel_type;
             int kc_num = sqrt(dets.size()/2);
-            if(kc_num<2)
+            if(kc_num<2){
+                if(dets.size()==1){
+                    cout<<"100%"<<endl;
+                    return 0;
+                }
+                else{
                 kc_num =2;
+                }
+            }
             kcentroid<kernel_type> kc(kernel_type(0.1),0.01,kc_num);
             kkmeans<kernel_type> test(kc);
 
@@ -125,9 +132,7 @@ int main(int argc, char** argv)
                 
                 projectPoints(nose_end_point3D, rotation_vector, translation_vector, camera_matrix, dist_coeffs, nose_end_point2D);
      
-     
-                //cv::line(im,image_points[0], nose_end_point2D[0], cv::Scalar(255,0,0), 2);
-                     
+
                 //cout << "Rotation Vector " << endl << rotation_vector << endl;
                 //cout << "Translation Vector" << endl << translation_vector << endl;
                              
@@ -135,27 +140,12 @@ int main(int argc, char** argv)
                 
                 //make some samples near the origin
                 
-               /* double sign = 1;
-                if (nose_end_point2D[0].x < center.x && nose_end_point2D[0].y < center.y)
-                      sign = -1;
-                */
+              
                 m(0) =sqrt(fabs(center.x*center.x - nose_end_point2D[0].x*nose_end_point2D[0].x));
                 m(1) =sqrt(fabs(center.y*center.y - nose_end_point2D[0].y*nose_end_point2D[0].y));
                 samples.push_back(m);
             
-            /*
-                if(center.x< nose_end_point2D[0].x){
-                 if(center.y+500<nose_end_point2D[0].y){
-                    cout<<"집중 중 맞음!"<<endl;
-                 }
-                 else{
-                    cout<<"아래 봄"<<endl;
-                 }
-                }
-                else{
-                    cout<<"딴데 봄"<<endl;
-                }
-                
+            /*  
                 ofstream fout;
                 fout.open("points.txt",ios::app);
                 
@@ -167,18 +157,19 @@ int main(int argc, char** argv)
             }
              // tell the kkmeans object we made that we want to run k-means with k set to 3.
             test.set_number_of_centers(kc_num);
-            pick_initial_centers(kc_num, initial_centers, samples, test.get_kernel());
-            
+            if(kc_num<samples.size()){
+                pick_initial_centers(kc_num, initial_centers, samples, test.get_kernel());
+            }
+            else{
+                initial_centers = samples;
+            }
             test.train(samples, initial_centers);
             int focus_count[kc_num]={0};
-           for (unsigned long i = 0; i < samples.size(); ++i){
-              //  cout<<test(samples[i])<<endl;
-                
+            for (unsigned long i = 0; i < samples.size(); ++i){
+              
                 focus_count[test(samples[i])]++;
             }
-            /*for(unsigned long i=0;i<kc_num;i++){
-            cout << "num dictionary vectors for center"<<i<<"  "<< test.get_kcentroid(i).dictionary_size() << endl;
-            }*/
+           
             int max = focus_count[0];
             for(int i=1;i<kc_num;i++){
                 if(max<focus_count[i])
