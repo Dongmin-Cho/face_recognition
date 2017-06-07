@@ -11,6 +11,8 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
+#include <dlib/clustering.h>
+#include <cstdio>
 using namespace cv;
 using namespace dlib;
 using namespace std;
@@ -27,14 +29,11 @@ std::vector<cv::Point2d> get_2d_image_points(full_object_detection &d)
       image_points.push_back( cv::Point2d( d.part(54).x(), d.part(54).y() ) );    // Right mouth corner
       return image_points;
 }
+//----------------------------------------------------------------------------------------------
 int main(int argc, char** argv)
 {  
     try
     {
-        // This example takes in a shape model file and then a list of images to
-        // process.  We will take these filenames in as command line arguments.
-        // Dlib comes with example images in the examples/faces folder so give
-        // those as arguments to this program.
         if (argc == 1)
         {
             cout << "Call this program like this:" << endl;
@@ -44,18 +43,12 @@ int main(int argc, char** argv)
             return 0;
         }
 
-        // We need a face detector.  We will use this to get bounding boxes for
-        // each face in an image.
         frontal_face_detector detector = get_frontal_face_detector();
-        // And we also need a shape_predictor.  This is the tool that will predict face
-        // landmark positions given an image and face bounding box.  Here we are just
-        // loading the model from the shape_predictor_68_face_landmarks.dat file you gave
-        // as a command line argument.
         shape_predictor sp;
         deserialize("shape_predictor_68_face_landmarks.dat") >> sp;
 
 
-        image_window win, win_faces;
+        //image_window win, win_faces;
 
         std::vector<cv::Point3d> model_points;
         model_points.push_back(cv::Point3d(0.0f, 0.0f, 0.0f));
@@ -68,7 +61,7 @@ int main(int argc, char** argv)
         // Loop over all the images provided on the command line.
         for (int i = 1; i < argc; ++i)
         {
-            cout << "processing image " << argv[i] << endl;
+            //cout << "processing image " << argv[i] << endl;
             array2d<rgb_pixel> img;
 
             
@@ -77,7 +70,6 @@ int main(int argc, char** argv)
             // Make the image larger so we can detect small faces.
             pyramid_up(img);
             
-            ///////////////////////////////////////////////////
             // Camera internals
             double focal_length = im.cols; // Approximate focal length.
             Point2d center = cv::Point2d(im.cols/2,im.rows/2);
@@ -95,16 +87,28 @@ int main(int argc, char** argv)
             // Now tell the face detector to give us a list of bounding boxes
             // around all the faces in the image.
             std::vector<rectangle> dets = detector(img);
-            cout << "Number of faces detected: " << dets.size() << endl;
+            //cout << "Number of faces detected: " << dets.size() << endl;
 
             // Now we will go ask the shape_predictor to tell us the pose of
             // each face we detected.
             std::vector<full_object_detection> shapes;
+            typedef matrix<double,2,1> sample_type;
+            typedef radial_basis_kernel<sample_type> kernel_type;
+            int kc_num = sqrt(dets.size()/2);
+            if(kc_num<2)
+                kc_num =2;
+            kcentroid<kernel_type> kc(kernel_type(0.1),0.01,kc_num);
+            kkmeans<kernel_type> test(kc);
+
+            std::vector<sample_type> samples;
+            std::vector<sample_type> initial_centers;
+
+            sample_type m;
             
             for (unsigned long j = 0; j < dets.size(); ++j)
             {
                 full_object_detection shape = sp(img, dets[j]);
-                cout << "number of parts: "<< shape.num_parts() << endl;
+               // cout << "number of parts: "<< shape.num_parts() << endl;
                 
                 std::vector<cv::Point2d> image_points = get_2d_image_points(shape);
                 
@@ -125,7 +129,19 @@ int main(int argc, char** argv)
                 //cout << "Rotation Vector " << endl << rotation_vector << endl;
                 //cout << "Translation Vector" << endl << translation_vector << endl;
                              
-                cout <<  nose_end_point2D << endl;// this is what we want!!!! 
+               // cout <<  nose_end_point2D << endl;// this is what we want!!!!
+                
+                //make some samples near the origin
+                
+               /* double sign = 1;
+                if (nose_end_point2D[0].x < center.x && nose_end_point2D[0].y < center.y)
+                      sign = -1;
+                */
+                m(0) =sqrt(fabs(center.x*center.x - nose_end_point2D[0].x*nose_end_point2D[0].x));
+                m(1) =sqrt(fabs(center.y*center.y - nose_end_point2D[0].y*nose_end_point2D[0].y));
+                samples.push_back(m);
+            
+            /*
                 if(center.x< nose_end_point2D[0].x){
                  if(center.y+500<nose_end_point2D[0].y){
                     cout<<"집중 중 맞음!"<<endl;
@@ -143,14 +159,37 @@ int main(int argc, char** argv)
                 
                 fout<<nose_end_point2D<<endl;
                 fout.close();
-
-                // You get the idea, you can get all the face part locations if
-                // you want them.  Here we just store them in shapes so we can
-                // put them on the screen.
+            */
                 shapes.push_back(sp(img,dets[j]));
 
             }
-
+             // tell the kkmeans object we made that we want to run k-means with k set to 3.
+            test.set_number_of_centers(kc_num);
+            pick_initial_centers(kc_num, initial_centers, samples, test.get_kernel());
+            
+            test.train(samples, initial_centers);
+            int focus_count[kc_num]={0};
+           for (unsigned long i = 0; i < samples.size(); ++i){
+              //  cout<<test(samples[i])<<endl;
+                
+                focus_count[test(samples[i])]++;
+            }
+            /*for(unsigned long i=0;i<kc_num;i++){
+            cout << "num dictionary vectors for center"<<i<<"  "<< test.get_kcentroid(i).dictionary_size() << endl;
+            }*/
+            int max = focus_count[0];
+            for(int i=1;i<kc_num;i++){
+                if(max<focus_count[i])
+                    max = focus_count[i];
+            }
+            string focus;
+            char percent[6];
+            sprintf(percent,"%.2f",((float)max/samples.size()*100));
+            focus = percent;
+            focus+="%";
+            cout<<focus<<endl;
+            std::vector<unsigned long> assignments = spectral_cluster(kernel_type(0.1), samples, kc_num);
+           // cout<<mat(assignments)<<endl;
             // Now let's view our face poses on the screen.
            // win.clear_overlay();
            // win.set_image(img);
@@ -163,8 +202,8 @@ int main(int argc, char** argv)
             //win_faces.set_image(tile_images(face_chips));
             
 
-            cout << "Hit enter to process the next image..." << endl;
-            cin.get();
+           // cout << "Hit enter to process the next image..." << endl;
+           // cin.get();
         }
     }
     catch (exception& e)
@@ -175,4 +214,5 @@ int main(int argc, char** argv)
 }
 
 // ----------------------------------------------------------------------------------------
+
 
