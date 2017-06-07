@@ -7,6 +7,8 @@
 #include <dlib/dnn.h>
 #include <dlib/image_io.h>
 #include <dlib/image_processing/frontal_face_detector.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 using namespace std;
 #define MAX_SIZE 4096
@@ -81,7 +83,7 @@ std::vector<std::string> get_files(std::string dir,std::string want_to_get)
     if((dp  = opendir(dir.c_str())) == NULL)
     {
         cout << "Error opening " << dir << endl;
-        mkdir(dir.c_str());
+        mkdir(dir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
         dp  = opendir(dir.c_str());
         cout << "mkdir" << dir << endl;
         //return files;
