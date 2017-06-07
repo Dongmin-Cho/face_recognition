@@ -91,20 +91,19 @@ int main(int argc, char** argv)
              return -1;
              // 검출 0명.
             }
+            
             // Now we will go ask the shape_predictor to tell us the pose of
             // each face we detected.
             std::vector<full_object_detection> shapes;
             typedef matrix<double,2,1> sample_type;
             typedef radial_basis_kernel<sample_type> kernel_type;
             int kc_num = sqrt(dets.size()/2);
+            if(dets.size()==1){
+                cout<<"100%"<<endl;
+                return 0;
+            }
             if(kc_num<2){
-                if(dets.size()==1){
-                    cout<<"100%"<<endl;
-                    return 0;
-                }
-                else{
-                kc_num =2;
-                }
+                kc_num = 2;
             }
             kcentroid<kernel_type> kc(kernel_type(0.1),0.01,kc_num);
             kkmeans<kernel_type> test(kc);
@@ -157,12 +156,10 @@ int main(int argc, char** argv)
             }
              // tell the kkmeans object we made that we want to run k-means with k set to 3.
             test.set_number_of_centers(kc_num);
-            if(kc_num<samples.size()){
+            if(kc_num<samples.size())
                 pick_initial_centers(kc_num, initial_centers, samples, test.get_kernel());
-            }
-            else{
+            else
                 initial_centers = samples;
-            }
             test.train(samples, initial_centers);
             int focus_count[kc_num]={0};
             for (unsigned long i = 0; i < samples.size(); ++i){
