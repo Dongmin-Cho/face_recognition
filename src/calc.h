@@ -82,7 +82,7 @@ std::vector<std::string> get_files(std::string dir,std::string want_to_get)
     {
         cout << "Error opening " << dir << endl;
         mkdir(dir.c_str());
-        dp  = opendir(dir.c_str())
+        dp  = opendir(dir.c_str());
         cout << "mkdir" << dir << endl;
         //return files;
     }
