@@ -48,8 +48,6 @@ int main(int argc, char** argv)
         deserialize("shape_predictor_68_face_landmarks.dat") >> sp;
 
 
-        //image_window win, win_faces;
-
         std::vector<cv::Point3d> model_points;
         model_points.push_back(cv::Point3d(0.0f, 0.0f, 0.0f));
         model_points.push_back(cv::Point3d(0.0f, -330.0f, -65.0f));
@@ -87,8 +85,12 @@ int main(int argc, char** argv)
             // Now tell the face detector to give us a list of bounding boxes
             // around all the faces in the image.
             std::vector<rectangle> dets = detector(img);
-            //cout << "Number of faces detected: " << dets.size() << endl;
-
+           // cout << "Number of faces detected: " << dets.size() << endl;
+            if(dets.size() ==0){
+             cout<<"-1"<<endl;
+             return -1;
+             // 검출 0명.
+            }
             // Now we will go ask the shape_predictor to tell us the pose of
             // each face we detected.
             std::vector<full_object_detection> shapes;
