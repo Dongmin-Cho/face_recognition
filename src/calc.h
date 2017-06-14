@@ -75,6 +75,24 @@ int search_MAX(std::vector<std::vector<float> > face_descriptors, std::vector<fl
     return max_index;
 }
 
+int identificate(std::vector<std::vector<float> > face_descriptors, std::vector<float> bench_descriptor)
+{
+    float max = -1;
+    int max_index = -1;
+    for(size_t i = 0; i < face_descriptors.size(); i++)
+    {
+        if(face_descriptors[i].size() == 0)
+            break;
+        float similarity = vector_inner_product(bench_descriptor, face_descriptors[i]);
+        if(similarity >= 0.4 && similarity > max)
+        {
+            max = similarity;
+            max_index = i;
+        }
+    }
+    return max_index;
+}
+
 std::vector<std::string> get_files(std::string dir,std::string want_to_get)
 {
     DIR *dp;
