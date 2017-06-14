@@ -9,6 +9,7 @@ macro(add_example name)
    target_link_libraries(${name} dlib::dlib )
 endmacro()
 add_example(check_attendance)
+add_example(check_attendance2)
 add_example(test_desc)
 add_example(test_vector)
 

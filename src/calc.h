@@ -84,7 +84,7 @@ int identificate(std::vector<std::vector<float> > face_descriptors, std::vector<
         if(face_descriptors[i].size() == 0)
             break;
         float similarity = vector_inner_product(bench_descriptor, face_descriptors[i]);
-        if(similarity >= 0.4 && similarity > max)
+        if(similarity > max)
         {
             max = similarity;
             max_index = i;
