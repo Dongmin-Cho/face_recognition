@@ -10,8 +10,6 @@ macro(add_example name)
 endmacro()
 add_example(check_attendance)
 add_example(check_attendance2)
-add_example(test_desc)
-add_example(test_vector)
 
 #add_example(crop)
 find_package(OpenCV)

@@ -10,7 +10,6 @@
 #include <utility>
 #include <vector>
 #include <time.h>
-//#include <chrono>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -20,7 +19,6 @@ using namespace cv;
 using namespace std;
 Mat _eye2cvMat(Point2f lp, Point2f rp)
 {
-	//Mat co = Mat::ones(3, 68, CV_32FC1);
 	Mat_<double> co(3, 2);
 
 	co.at<double>(0, 0) = lp.x;
@@ -95,7 +93,7 @@ Mat _cropFaceImagebyEYE(Mat inIm, Point2f EyelocL, Point2f EyelocR, int cropWidt
 	eCenterX = eCenterX - sp.x;
 	eCenterY = eCenterY - sp.y;
 
-	Mat sImg0, rotateImg; //���� img�� 1.5�� img
+	Mat sImg0, rotateImg;
 	float tscale = 1.2f;
 	float scale = float(cropWidth * feyewidRatio) / float(L);
 	int oWidth = gim.cols;
@@ -126,29 +124,24 @@ Mat _cropFaceImagebyEYE(Mat inIm, Point2f EyelocL, Point2f EyelocR, int cropWidt
 	eCenterY = eCenterY + dy;
 
 	Rect trect(dx, dy, sImg0.cols, sImg0.rows);
-	//sImg15(trect) = sImg0;
+
 	sImg0.copyTo(rotateImg(trect));
 
 	if (EyelocL.y < EyelocR.y)
 		deg = -deg;
 	Point2f src_center(eCenterX, eCenterY);
 	Mat rotateMat = getRotationMatrix2D(src_center, -deg, 1.0);
-	//warpAffine(gim, rotateImg, rotateMat, cv::Size(100,100),2);
 	warpAffine(rotateImg, rotateImg, rotateMat, rotateImg.size(), 2);
 
 	Mat Rot_coEye = rotateMat*_eye2cvMat(EyelocL, EyelocR);
 
-	/*circle(rotateImg, Point2d(eCenterX,eCenterY), 1, Scalar(0, 255, 0));*/
-	/*circle(rotateImg, EyelocL, 1, Scalar(0,255,0));
-	circle(rotateImg, EyelocR, 1, Scalar(0, 255, 0));*/
-
 	int nx, ny;
-	/*nx = floor((EyelocL.x + EyelocR.x) / 2 - cropWidth / 2);
-	ny = floor(nHeight / 2 - cropHeight / eye_hLevel);*/
 	float ftmp = (1.f - feyewidRatio)*0.5;
 	nx = floor(EyelocL.x - cropWidth * ftmp);
 	ny = floor(EyelocL.y - cropHeight * feyehLevel);
 	Rect nFaceRect; nFaceRect.x = nx; nFaceRect.y = ny; nFaceRect.width = cropWidth; nFaceRect.height = cropHeight;
+
+	//if error
 	if (nx < 0 || ny < 0 || nx + cropWidth > rotateImg.cols || ny + cropHeight > rotateImg.rows){
         cout<<"========="<<endl;
         cout << "nx        : " << nx << endl;
